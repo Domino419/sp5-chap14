@@ -3,6 +3,7 @@ package config;
 import controller.ChangePwdController;       // 250106 추기
 import controller.LogoutController;
 import controller.MemberListController;      //250107 추가
+import controller.MemberDetailController;      //250107 추가
 
 
 import org.apache.commons.logging.Log;
@@ -96,6 +97,18 @@ public class ControllerConfig {
 	@Bean
 	public MemberListController memberListController() {
 		MemberListController controller = new MemberListController();
+		controller.setMemberDao(memberDao);
+		return controller;
+	}
+
+	/**
+	 * method        : memberDetailController
+	 * date          : 25-01-07
+	 * return        : memberDetailController - 회원 정보 조회를 위한 컨트롤러 ( ID로 조회)
+	 */
+	@Bean
+	public MemberDetailController memberDetailController() {
+		MemberDetailController controller = new MemberDetailController();
 		controller.setMemberDao(memberDao);
 		return controller;
 	}

@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
@@ -26,6 +27,26 @@ public class MemberDao {
 
 	private JdbcTemplate jdbcTemplate;
 
+
+	/**
+	 * memberRowMapper : ResultSet에서 Member 객체를 생성하는 RowMapper 구현체
+	 * date           : 2025-01-07
+	 * description    : 데이터베이스에서 조회한 결과(ResultSet)를 Member 객체로 매핑하는 RowMapper
+	 */
+	private RowMapper<Member> memberRowMapper =
+			new RowMapper<Member>() {
+				@Override
+				public Member mapRow(ResultSet rs, int rowNum) throws SQLException {
+					Member member = new Member(
+							rs.getString("EMAIL"),
+							rs.getString("PASSWORD"),
+							rs.getString("NAME"),
+							rs.getTimestamp("REGDATE").toLocalDateTime());
+					member.setId(rs.getLong("ID"));
+					return member;
+				}
+			} ;
+
 	public MemberDao(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
@@ -37,20 +58,7 @@ public class MemberDao {
 	 */
 	public Member selectByEmail(String email) {
 		List<Member> results = jdbcTemplate.query(
-				"select * from MEMBER where EMAIL = ?",
-				new RowMapper<Member>() {
-					@Override
-					public Member mapRow(ResultSet rs, int rowNum) throws SQLException {
-						Member member = new Member(
-								rs.getString("EMAIL"),
-								rs.getString("PASSWORD"),
-								rs.getString("NAME"),
-								rs.getTimestamp("REGDATE").toLocalDateTime());
-						member.setId(rs.getLong("ID"));
-						return member;
-					}
-				}, email);
-
+				"select * from MEMBER where EMAIL = ?",memberRowMapper, email);
 		return results.isEmpty() ? null : results.get(0);
 	}
 
@@ -104,16 +112,7 @@ public class MemberDao {
 	 * return        : List<Member> - 모든 회원 정보를 리스트로 반환
 	 */
 	public List<Member> selectAll() {
-		List<Member> results = jdbcTemplate.query("select * from MEMBER",
-				(ResultSet rs, int rowNum) -> {
-					Member member = new Member(
-							rs.getString("EMAIL"),
-							rs.getString("PASSWORD"),
-							rs.getString("NAME"),
-							rs.getTimestamp("REGDATE").toLocalDateTime());
-					member.setId(rs.getLong("ID"));
-					return member;
-				});
+		List<Member> results = jdbcTemplate.query("select * from MEMBER",memberRowMapper);
 		return results;
 	}
 
@@ -136,21 +135,22 @@ public class MemberDao {
 	public List<Member> selectByRegdate(LocalDateTime from, LocalDateTime to) {
 		List<Member> results = jdbcTemplate.query(
 				"select * from MEMBER where REGDATE between ? and ? order by REGDATE desc",
-				new RowMapper<Member>() {
-					@Override
-					public Member mapRow(ResultSet rs, int rowNum) throws SQLException {
-						Member member = new Member(
-								rs.getString("EMAIL"),
-								rs.getString("PASSWORD"),
-								rs.getString("NAME"),
-								rs.getTimestamp("REGDATE").toLocalDateTime()); // REGDATE 컬럼 값을 LocalDateTime으로 변환 후 설정
-						member.setId(rs.getLong("ID"));
-						return member;
-					}
-				},
-				from, to
-		);
+				memberRowMapper,
+				from, to );
 		return results;
 	}
+
+	/**
+	 * method        : selectById
+	 * date          : 25-01-07
+	 * return        : Member - 주어진 ID에 해당하는 회원 정보를 반환. 회원이 존재하지 않으면 null을 반환.
+	 */
+	public Member selectById(Long memId) {
+		List<Member> results = jdbcTemplate.query(
+				"select * from MEMBER where ID = ?",
+				memberRowMapper, memId);
+		return results.isEmpty() ? null : results.get(0);
+	}
+
 
 }
