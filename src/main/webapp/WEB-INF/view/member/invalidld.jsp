@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>에러  </title>
+    <title>에러 페이지 </title>
 
 </head>
 <body>
