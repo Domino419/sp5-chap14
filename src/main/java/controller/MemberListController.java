@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import spring.Member;
 import spring.MemberDao;
+import org.springframework.validation.Errors;
+
 
 /**
  * class         : MemberListController
@@ -35,13 +37,18 @@ public class MemberListController {
      * description   : 날짜 범위에 따라 회원 목록을 조회하여 모델에 추가하고 회원 목록 페이지를 반환한다.
      */
     @RequestMapping("/members")
-    public String list(@ModelAttribute("cmd") ListCommand listCommand, Model model) {
+    public String list( @ModelAttribute("cmd") ListCommand listCommand, Errors errors, Model model) {
         log.info(":::::::::::::::::::::::::::::::::::::::: listCommand.from & to " + listCommand.getFrom() + "::::::::::" +  listCommand.getTo() );
+
+        if(errors.hasErrors()) {
+            return "member/memberList";
+        }
+
         if(listCommand.getFrom() !=null && listCommand.getTo() != null) {
             List<Member> members = memberDao.selectByRegdate(
                     listCommand.getFrom(), listCommand.getTo()) ;
             model.addAttribute("members", members);
         }
-        return "members/memberList";
+        return "member/memberList";    // 리턴할 때 members/memberList 로 하는 바람에 404 에러
     }
 }

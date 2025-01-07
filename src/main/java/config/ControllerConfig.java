@@ -2,6 +2,8 @@ package config;
 
 import controller.ChangePwdController;       // 250106 추기
 import controller.LogoutController;
+import controller.MemberListController;      //250107 추가
+
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,6 +16,8 @@ import controller.LoginController;      // 250102 추기
 import spring.ChangePasswordService;    // 250106 추기
 import spring.MemberRegisterService;
 import spring.AuthService; // 250102 추기
+import spring.MemberDao; // 250107 추기
+
 
 /**
  * class         : ControllerConfig
@@ -31,6 +35,9 @@ public class ControllerConfig {
 
 	@Autowired
 	private ChangePasswordService changePasswordService;
+
+	@Autowired
+	private MemberDao memberDao; //  기간 조회를 위해 추가
 
 	private static final Log log = LogFactory.getLog(RegisterController.class);  // log
 
@@ -78,6 +85,18 @@ public class ControllerConfig {
 	public ChangePwdController changePwdController() {
 		ChangePwdController controller = new ChangePwdController();
 		controller.setChangePasswordService(changePasswordService);
+		return controller;
+	}
+
+	/**
+	 * method        : memberListController
+	 * date          : 25-01-07
+	 * return        : MemberListController - 회원 목록 조회를 처리하는 컨트롤러 (기간조회 목적)
+	 */
+	@Bean
+	public MemberListController memberListController() {
+		MemberListController controller = new MemberListController();
+		controller.setMemberDao(memberDao);
 		return controller;
 	}
 
